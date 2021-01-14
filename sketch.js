@@ -6,21 +6,23 @@ var ground, groundImage;
 var waste1, waste2, waste3, waste4;
 var PLAY = 1;
 var END = 0;
-var gameState = PLAY;
+var START = 2;
+var gameState = START;
 var score = 0;
 var obstaclesGroup;
 var carGroup;
 var gameOver, restart;
 var c1, c2, c3, c4;
-var battery=100;
-var b1,b2,b3,b4;
+var battery = 100;
+var b1, b2, b3, b4;
 var energy;
-var rechargeImg,rechargeGroup;
+var rechargeImg, rechargeGroup;
+
 
 function preload() {
   rob_walking = loadAnimation("images/robwalking.png", "images/rob2.png", "images/rob3.png");
   rob_picking = loadAnimation("images/robwalking.png", "images/rob picking2.png", "images/rob picking3.png")
-  rob_stopped =loadAnimation("images/roboO.png")
+  rob_stopped = loadAnimation("images/roboO.png")
 
   waste1 = loadImage("images/waste1.png")
   waste2 = loadImage("images/waste2.png")
@@ -32,12 +34,12 @@ function preload() {
   c3 = loadImage("images/car3.png")
   c4 = loadImage("images/car4.png")
 
-  b1=loadImage("images/full.png");
-  b2=loadImage("images/battery3.png")
-  b3=loadImage("images/battery2.png");
-  b4=loadImage("images/lessbattery.png")
-  rechargeImg=loadImage("images/recharge.png")
-  
+  b1 = loadImage("images/full.png");
+  b2 = loadImage("images/battery3.png")
+  b3 = loadImage("images/battery2.png");
+  b4 = loadImage("images/lessbattery.png")
+  rechargeImg = loadImage("images/recharge.png")
+
   groundImage = loadImage("images/track.jpg");
   restartImg = loadImage("images/restart.png");
   gameOverImg = loadImage("images/gameOver.png");
@@ -45,28 +47,29 @@ function preload() {
 function setup() {
   createCanvas(800, 600);
 
-fill ("white")
-  ground = createSprite(width / 2, -height * 4, width, height * 5);
-  ground.addImage("ground", groundImage);
+  fill("white")
+  ground = createSprite(width / 2, height / 2, 500, 1500);
+  ground.addImage( groundImage);
   // ground.y = ground.height / 2;
   // ground.velocityY = (6 + 3 * score / 100);
   robot = createSprite(width / 2, 180, 20, 50);
   robot.addAnimation("walking", rob_walking);
   robot.addAnimation("picking", rob_picking);
-  robot.addAnimation("stopped",rob_stopped)
+  robot.addAnimation("stopped", rob_stopped)
   robot.scale = 0.6
 
-  energy=createSprite(100,100);
-  energy.scale=0.2;
+  energy = createSprite(100, 100);
+  energy.scale = 0.2;
 
   score = 0;
   obstaclesGroup = []
   carGroup = []
-  rechargeGroup=new Group ();
+  rechargeGroup = new Group();
 }
 function draw() {
 
   background("white")
+
 
 
   if (gameState === PLAY) {
@@ -82,60 +85,60 @@ function draw() {
     if (keyDown("left")) {
       robot.x = robot.x - 3
     }
-    if(frameCount%300===0){
-      battery=battery-15;
+    if (frameCount % 300 === 0) {
+      battery = battery - 15;
     }
-    energy.y=robot.y-50;
-    energy.x=robot.x+50;
-    if(battery>=75){
+    energy.y = robot.y - 50;
+    energy.x = robot.x + 50;
+    if (battery >= 75) {
       energy.addImage(b1)
     }
-    if(battery>=50&&battery<75){
+    if (battery >= 50 && battery < 75) {
       energy.addImage(b2)
     }
-    if(battery>=25&&battery<50){
+    if (battery >= 25 && battery < 50) {
       energy.addImage(b3)
     }
-    if(battery<25){
+    if (battery < 25) {
       energy.addImage(b4)
     }
-    if(robot.isTouching(rechargeGroup)){
-      battery=max(100,battery+25);
+    if (robot.isTouching(rechargeGroup)) {
+      battery = max(100, battery + 25);
       rechargeGroup.destroyEach();
     }
-   robot.changeAnimation("walking",rob_walking);
-    ground.y=-displayHeight*4;
+    robot.changeAnimation("walking", rob_walking);
+    ground.y = -displayHeight * 4;
     for (var i = 0; i < obstaclesGroup.length; i++) {
       if (robot.isTouching(obstaclesGroup[i])) {
-        score = score + 5;
+        score = score + 1;
         fill("white")
- 
+
 
         obstaclesGroup[i].destroy();
       }
     }
-    for (var i = 0; i < obstaclesGroup.length; i++) {
-      if (robot.y-100<=obstaclesGroup[i].y) {
-        score = min(0,score - 5);
-        obstaclesGroup[i].destroy();
-        fill("red");
- 
+    // for (var i = 0; i < obstaclesGroup.length; i++) {
+    //   if (robot.y-100<=obstaclesGroup[i].y) {
+    //     score = min(0,score - 5);
+    //     obstaclesGroup[i].destroy();
+    //     fill("red");
 
-      }
-    }
-    // for (var i = 0; i < carGroup.length; i++) {
-    //   if (battery<=0||robot.isTouching(carGroup[i])) {
-    //     carGroup[i].velocityY=0;
-    //     gameState=END;
-    //     gameOver = createSprite(width/2,robot.y-100);
-    //     gameOver.addImage(gameOverImg);
-    //     gameOver.scale=0.5;
-      
-    //     restart = createSprite(width/2, robot.y-50);
-    //     restart.addImage(restartImg);
-  
+
     //   }
     // }
+    for (var i = 0; i < carGroup.length; i++) {
+      if (battery <= 0 || robot.isTouching(carGroup[i])) {
+        carGroup[i].velocityY = 0;
+        gameState = END;
+        gameOver = createSprite(width / 2, robot.y - 100);
+        gameOver.addImage(gameOverImg);
+        gameOver.scale = 0.5;
+
+        restart = createSprite(width / 2, robot.y - 50);
+        restart.addImage(restartImg);
+
+      }
+    }
     camera.position.y = robot.position.y;
     camera.position.x = width / 2;
 
@@ -146,10 +149,11 @@ function draw() {
     // if (ground.y < 0) {
     //   ground.y= ground.height / 2;
     // }
+    drawSprites();
   } else if (gameState === END) {
     background(150)
-   ground.velocityY=0;
-  robot.changeAnimation("stopped",rob_stopped);
+    ground.velocityY = 0;
+    robot.changeAnimation("stopped", rob_stopped);
     gameOver.visible = true;
     restart.visible = true;
     //set velcity of each game object to 0
@@ -157,20 +161,33 @@ function draw() {
     robot.velocityX = 0;
 
     fill("yellow")
-    
-  
+
+
     if (mousePressedOver(restart)) {
       reset();
     }
+    drawSprites();
   }
-  drawSprites();
+  // drawSprites();
   textSize(30)
   text("Score: " + score, camera.position.x + 250, camera.position.y - 250);
+  if (gameState === START) {
+    background("pink")
+    textAlign(CENTER);
+    textSize(50);
+    stroke("blue")
+    fill("lightblue")
+    text("Welcome To Rob The Cleaner ", 400, 300)
+    text("Press Space to Play ", 400, 370);
+    if (keyDown("space")) {
+      gameState = PLAY;
+    }
+  }
 }
 function reset() {
 
-  gameState = PLAY;
-  ground.visible=true;
+  gameState = START;
+  ground.visible = true;
   gameOver.visible = false;
   restart.visible = false;
   gameOver.destroy();
@@ -181,17 +198,18 @@ function reset() {
   console.log(localStorage["HighestScore"]);
 
   score = 0;
-robot.x=width/2;
-robot.y=180;
-for (var i = 0; i < obstaclesGroup.length; i++) {
- 
-    
+  battery = 100;
+  robot.x = width / 2;
+  robot.y = 180;
+  for (var i = 0; i < obstaclesGroup.length; i++) {
+
+
     obstaclesGroup[i].destroy();
-    
-}
-for (var i = 0; i < carGroup.length; i++) {
-  carGroup[i].destroy();
-}
+
+  }
+  for (var i = 0; i < carGroup.length; i++) {
+    carGroup[i].destroy();
+  }
 
 }
 function spawnObstacles() {
@@ -231,8 +249,8 @@ function spawnrecharge() {
     recharge.x = Math.round(random(50, width - 50))
     recharge.y = robot.y - 300;
     recharge.addImage(rechargeImg);
-    
-   
+
+
 
     //assign scale and lifetime to the obstacle           
     recharge.scale = 0.2;
